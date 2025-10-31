@@ -1,13 +1,23 @@
-Problems with the code:
-
-    Scaling factors need to be a lot more abstract
-
-    What is categorized as signal and background is hardcoded in function calculate_all_yields
-
-    This is hardcoded in the main function as well
-
-    Create table data from save results has hardcoded mapping in code
-
-
-    variable_binning:
+variable_binning:
   MetOHT, met_tst, dLepR, dMetZPhi, Z_pT, mT_ZZ, dPhill, n_jets, second_jet_pt, mjj, detajj, MetOHT_2, MetOZPt, proshmo, met_signif, M2Lep, n_bjets
+
+#Deprecated helpers.py contains function with os.listdir to check for region folders.
+SAMPLE_PATHS:
+  DATA: DATA.root
+  llll: llll.root
+  lllljj: lllljj.root
+  llqq: llqq.root
+  llvv: llvv.root
+  llvvjj_WW: llvvjj_WW.root
+  llvvjj: llvvjj.root
+  top: top.root
+  ttbarV_ttbarVV: ttbarV_ttbarVV.root
+  VVV: VVV.root
+  W_jets: W_jets.root
+  Wt: Wt.root
+  WW: WW.root
+  WZ_jj: WZ_jj.root
+  WZ: WZ.root
+  Z_jets_mumu: Z_jets_mumu.root
+  Z_jets_ee: Z_jets_ee.root
+  Ztt: Ztt.root

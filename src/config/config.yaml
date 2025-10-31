@@ -19,35 +19,10 @@ BASE_PATH: ./SAMPLES/
 analysis:
   region: SR
   control_type: SR
-  event_type: ee
+  event_type: all
   scaling_option: Unscaled
 
-# Constants and configuration
-# Hardcoded Sample paths. Some .root fies might be missing. 
-# After asking question we could use an os.listDir and automatically fetch all files under a region folder instead of hardcoding.
-
-SAMPLE_PATHS:
-  DATA: DATA.root
-  llll: llll.root
-  lllljj: lllljj.root
-  llqq: llqq.root
-  llvv: llvv.root
-  llvvjj_WW: llvvjj_WW.root
-  llvvjj: llvvjj.root
-  top: top.root
-  ttbarV_ttbarVV: ttbarV_ttbarVV.root
-  VVV: VVV.root
-  W_jets: W_jets.root
-  Wt: Wt.root
-  WW: WW.root
-  WZ_jj: WZ_jj.root
-  WZ: WZ.root
-  Z_jets_mumu: Z_jets_mumu.root
-  Z_jets_ee: Z_jets_ee.root
-  Ztt: Ztt.root
-
 # Physics variable binning configurations
-
 variable_binning:
   MetOHT: [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.9, 2]
   met_tst: [0, 10, 20, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 140, 200]
@@ -131,6 +106,36 @@ scaling_factors:
     sf_3_ee: 1.06326
     sf_3_mm: 1.05263
     sf_top: 1.01293
+  Scaled_Test_2x:
+    sf_WW: 2
+    sf_3lCR: 2
+    sf_0_ee: 2
+    sf_0_mm: 2
+    sf_1_ee: 2
+    sf_1_mm: 2
+    sf_2_ee: 2
+    sf_2_mm: 2
+    sf_3_ee: 2
+    sf_3_mm: 2
+    sf_top: 2
 
-# Add other scaling options similarly
+#Careful with this structure! Every sample name must be referenced only once in the scaling_application section. Take a look at the apply_scaling_factors.
+scaling_application:
+  no_jets:
+    sf_top: [top, ttbarV_ttbarVV]
+    sf_WW: [WW]
+    sf_3lCR: [WZ, WZ_jj, lllljj, llll]
+  with_jets:
+    sf_x_ee: [Z_jets_ee]
+    sf_x_mm: [Z_jets_mumu]
 
+classification:
+  signal:
+    ewk: [llvvjj]
+    qcd: [llvv]
+  background:
+    wz: [WZ]
+    zjets: [Z_jets_ee, Z_jets_mumu]
+    top: [top, ttbarV_ttbarVV]
+    ww: [WW]
+    other: [llll, llqq, VVV, W_jets, Ztt]
