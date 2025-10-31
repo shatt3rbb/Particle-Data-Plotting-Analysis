@@ -1,0 +1,40 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+
+# --- Environment files ---
+.env
+.env.*
+
+# --- VSCode ---
+.vscode/
+
+# --- Project-specific folders ---
+results/
+SAMPLES/
+
+# --- macOS / Windows ---
+.DS_Store
+Thumbs.db
+
+# --- Logs and temporary files ---
+*.log
+*.tmp
+*.bak
+
+# --- Jupyter Notebooks checkpoints ---
+.ipynb_checkpoints/
+
+# --- Cache and build artifacts ---
+.cache/
+build/
+dist/
+*.egg-info/
+
+# --- Misc ---
+.idea/

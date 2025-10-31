@@ -1,0 +1,13 @@
+Problems with the code:
+
+    Scaling factors need to be a lot more abstract
+
+    What is categorized as signal and background is hardcoded in function calculate_all_yields
+
+    This is hardcoded in the main function as well
+
+    Create table data from save results has hardcoded mapping in code
+
+
+    variable_binning:
+  MetOHT, met_tst, dLepR, dMetZPhi, Z_pT, mT_ZZ, dPhill, n_jets, second_jet_pt, mjj, detajj, MetOHT_2, MetOZPt, proshmo, met_signif, M2Lep, n_bjets
