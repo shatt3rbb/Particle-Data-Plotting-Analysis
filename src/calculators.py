@@ -20,6 +20,7 @@ def calculate_significance(signal, background):
     try:
         return np.sqrt(2 * ((signal + background) * np.log(1 + (signal / background)) - signal))
     except (ZeroDivisionError, ValueError):
+        print("Warning: Division by zero or invalid value encountered in significance calculation. Returning 0.")
         return 0
 
 def calculate_yields(data, channel):
@@ -191,6 +192,7 @@ def create_yield_table(results, channels):
             f"{channel_results['data'][1]:.2f}"
         ])
         
+        # Add signal rows
         for key in channel_results['signals']:
             table_data.append([
                 f"Signal - {key} ({channel})",
@@ -198,6 +200,7 @@ def create_yield_table(results, channels):
                 f"{channel_results['signals'][key][1]:.2f}"
             ])
         
+        # Add background rows
         for key in channel_results['backgrounds']:
             table_data.append([
                 f"Background - {key} ({channel})",

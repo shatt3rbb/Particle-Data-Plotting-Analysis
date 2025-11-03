@@ -157,9 +157,11 @@ def apply_scaling_factors(samples, scaling_factors, config_path='./src/config/co
         sf_val = scaling_factors.get(sf_key)
         if sf_val is None:
             # skip unknown scaling key
+            print(f"Warning: Scaling factor '{sf_key}' not found in scaling_factors. Skipping '{sf_key}'.")
             continue
         for sample_name in sample_list:
             if sample_name not in samples:
+                print(f"Warning: Sample '{sample_name}' not found in samples while trying to apply scaling factors. Check that values in arrays of your scaling application config point directly to .root files. Skipping {sample_name}")
                 continue
             # multiply entire global_weight column
             samples[sample_name]['global_weight'] = samples[sample_name]['global_weight'] * sf_val
@@ -178,6 +180,7 @@ def apply_scaling_factors(samples, scaling_factors, config_path='./src/config/co
                 chan = parts[-1]
 
         if chan is None:
+            print(f"Warning: Could not infer channel from scaling factor key '{sf_key}' while trying to apply 'with_jets' scaling to {sample_list}. Skipping scaling of associated samples. Check your config.")
             # unable to infer channel, skip entry
             continue
 
@@ -191,15 +194,18 @@ def apply_scaling_factors(samples, scaling_factors, config_path='./src/config/co
 
         for sample_name in sample_list:
             if sample_name not in samples:
+                print(f"Warning: Sample '{sample_name}' not found in samples while trying to apply scaling factors. Check that values in arrays of your scaling application config point directly to .root files. Skipping {sample_name}")
                 continue
             df = samples[sample_name]
             # ensure n_jets column exists
             if 'n_jets' not in df.columns or 'global_weight' not in df.columns:
+                print(f"Warning: Sample '{sample_name}' does not contain 'n_jets' or 'global_weight' columns required for jet-bin scaling. Skipping associated scaling.")
                 continue
             # Apply per-bin scaling
             for jet_bin, key in bin_sf_keys.items():
                 sf_val = scaling_factors.get(key)
                 if sf_val is None:
+                    print(f"Warning: Scaling factor '{sf_key}' not found in scaling_factors. Skipping.")
                     continue
                 if jet_bin == 'gt2':
                     mask = df['n_jets'] > 2
@@ -219,15 +225,21 @@ def create_signal_and_background(data, config_path='./src/config/config.yaml'):
     for key, val in classification['signal'].items():
         try:
             signal[key] = pd.concat(data[sample] for sample in val if sample in data)
+            for sample in val:
+                if sample not in data:
+                    print(f"Warning: '{sample}' not found in data. Make sure all your root files are in place and Classification in config.yaml is aligned.")
         except (KeyError, ValueError):
-            Warning = f"Problem when trying to create signal from data. Make sure all your root files are in place and Classification in config.yaml is aligned."
+            Warning = f"Warning: Problem when trying to create signal from data while parsing '{key}' and '{val}'. Make sure all your root files are in place and Classification in config.yaml is aligned."
             print(Warning)
             continue
     for key, val in classification['background'].items():
         try:
             background[key] = pd.concat(data[sample] for sample in val if sample in data)
+            for sample in val:
+                if sample not in data:
+                    print(f"Warning: '{sample}' not found in data. Make sure all your root files are in place and Classification in config.yaml is aligned.")
         except (KeyError, ValueError):
-            Warning = f"Problem when trying to create background from data. Make sure all your root files are in place and Classification in config.yaml is aligned."
+            Warning = f"Warning: Problem when trying to create background from data while parsing '{key}' and '{val}'. Make sure all your root files are in place and Classification in config.yaml is aligned."
             print(Warning)
             continue
     return signal, background

@@ -17,6 +17,7 @@ venv/
 # --- Project-specific folders ---
 results/
 SAMPLES/
+TEST_SAMPLES/
 
 # --- macOS / Windows ---
 .DS_Store
