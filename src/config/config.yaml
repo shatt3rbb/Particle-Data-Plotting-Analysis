@@ -1,14 +1,14 @@
-############################ What are the choices ?????????????????? ############################
-# reg : what region we care about (SR,3lCR,emCR_A,emCR_B,Zjets) (Subolders of the SAMPLES Folder)
+# What are the choices?
+# reg : what region we care about (SR,3lCR,emCR_A,emCR_B,Zjets) (Subfolders of the SAMPLES Folder)
 # control_type : what cuts? 
 #     for SR: SR
 #     for 3lCR : 3lCR_nominal,3lCR_var1,3lCR_var2,3lCR_var3,3lCR_var4
-#     for emCR_A : emCR_A_nominal,emCR_A_nominal,emCR_A_var1,emCR_A_var2,emCR_A_var3,emCR_A_var4
-#     for emCR_B: emCR_B_nominal,emCR_B_nominal,emCR_B_var1,emCR_B_var2,emCR_B_var3,emCR_B_var4
+#     for emCR_A : emCR_A_nominal, emCR_A_var1,emCR_A_var2,emCR_A_var3,emCR_A_var4
+#     for emCR_B: emCR_B_nominal, emCR_B_var1,emCR_B_var2,emCR_B_var3,emCR_B_var4
 #     for Zjets: Zjets_nominal,CR1_NB,CR1_WB,CR2_NB,CR2_WB,CR3_NB,CR3_WB
 # event_type : what channel to plot? 
-#     all,ee,mm. Event types with 3 leptons like eee, mme,mmm, mee are also considered for the control regions.
-# add_comment : 
+#     all,ee,mm. Event types with 3 leptons like eee, mme, mmm, mee are also considered for the control regions.
+# scaling option : 
 #     if Unscaled, then no scaling applied. 
 #     if Scaled_[var], then use the scaling obtained by the respective fitting var.
 #     var choices : 
