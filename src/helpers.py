@@ -1,8 +1,9 @@
 import pandas as pd
 import yaml
 import os
-import uproot3 as uproot
+import uproot
 import numpy as np
+import awkward as ak
 
 def load_run_config(config_path):
     with open(config_path, 'r') as f:
@@ -75,7 +76,7 @@ def load_data_filtering_event_type(sample_path, event_type):
     print(f'Loading data from: {sample_path}')
     file = uproot.open(sample_path)
     tree = file['tree']
-    n_entries = tree.numentries
+    n_entries = tree.num_entries
     print(f'File contains {n_entries} entries')
 
     # Mapping event_type to selection lambda
@@ -91,12 +92,17 @@ def load_data_filtering_event_type(sample_path, event_type):
 
     chunk_size = 400000
     chunks = []
-    for i in range(0, n_entries, chunk_size):
-        chunk = tree.pandas.df(entrystart=i, entrystop=min(i+chunk_size, n_entries), flatten=False)
+    
+    total_processed = 0
+    # uproot v5 iterator
+    for chunk in tree.iterate(step_size=chunk_size, library="pd"):
         # Apply event type selection using the mapping
         chunk = selection_map[event_type](chunk)
         chunks.append(chunk)
-        print(f'Processed {min(i+chunk_size, n_entries)} events')
+        
+        # Approximate progress tracking (chunk size is dynamic in last block, but we can just sum up len)
+        total_processed += len(chunk)
+        print(f'Processed {total_processed} events')
 
     try:
         data = pd.concat(chunks)

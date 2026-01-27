@@ -1,6 +1,6 @@
 pandas
-numpy==1.26.4
-uproot3
+numpy
+uproot
 matplotlib
 scipy
 pyyaml
