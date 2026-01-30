@@ -18,6 +18,7 @@ venv/
 results/
 SAMPLES/
 TEST_SAMPLES/
+Tools/
 
 # --- macOS / Windows ---
 .DS_Store

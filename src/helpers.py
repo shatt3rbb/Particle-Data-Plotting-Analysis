@@ -90,7 +90,7 @@ def load_data_filtering_event_type(sample_path, event_type):
         'all': lambda df: df  # No filtering
     }
 
-    chunk_size = 400000
+    chunk_size = 100000
     chunks = []
     
     total_processed = 0
@@ -143,6 +143,8 @@ def apply_analysis_cuts(data, control_type):
     with open('./src/config/config.yaml', 'r') as f:
         config = yaml.safe_load(f)
     cuts = config['cuts'].get(control_type, {})
+    if cuts is None:
+        cuts = {}
     data = data.reset_index(drop=True)  # Ensure index is sequential and starting from 0
     mask = pd.Series([True] * len(data))
     for var, expr in cuts.items():
