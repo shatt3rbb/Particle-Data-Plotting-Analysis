@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-import uproot3 as uproot
+import uproot
 import numpy as np
 import math
 from matplotlib import pyplot as plt
@@ -18,7 +18,12 @@ def calculate_significance(signal, background):
         Significance value
     """
     try:
-        return np.sqrt(2 * ((signal + background) * np.log(1 + (signal / background)) - signal))
+        if signal <= 0 or background <= 0:
+            return 0
+        val = 2 * ((signal + background) * np.log(1 + (signal / background)) - signal)
+        if val < 0:
+            return 0
+        return np.sqrt(val)
     except (ZeroDivisionError, ValueError):
         print("Warning: Division by zero or invalid value encountered in significance calculation. Returning 0.")
         return 0
@@ -39,7 +44,8 @@ def calculate_yields(data, channel):
         data = data[data['event_3CR'] == 4]
     
     signal = data['global_weight'].sum()
-    uncertainty = np.sqrt(np.square(data['global_weight']).sum())
+    # In MC, the squared statistical uncertainty is the sum of squared weights
+    uncertainty = np.sqrt(np.sum(np.square(data['global_weight'])))
     
     return signal, uncertainty
 

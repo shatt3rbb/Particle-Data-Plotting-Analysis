@@ -1,0 +1,16 @@
+# Future Architecture Improvements
+
+This document outlines potential future architectural upgrades for the analysis project, particularly when scaling to massive datasets (e.g., full Run-2 open data).
+
+## 1. Memory Efficiency: Transitioning to Dask or Awkward-Array
+Currently, the pipeline loads ROOT data into memory using Pandas and concatenates all chunks via `pd.concat()`. This can lead to Out-Of-Memory (OOM) errors on large datasets. Transitioning to lazy-loading or jagged arrays (like `dask` or `awkward-array`) is a solution, but with the following drawbacks and considerations:
+- **Refactoring Overhead**: Core functions in `helpers.py` and `calculators.py` rely on Pandas vectorized operations. These would need to be completely rewritten using Dask APIs or Awkward array syntaxes.
+- **Slower Execution for RAM-sized Data**: If the dataset fits comfortably in your computer's RAM, Pandas processes numerical operations at C++ speeds. Dask introduces task scheduling overhead that actually slows down execution for small/medium datasets.
+- **Loss of `pandas.eval()` Optimization**: The newly implemented string-based cut evaluations (`apply_analysis_cuts`) are highly optimized in Pandas but are partially or entirely unsupported by lazy evaluation frameworks, requiring custom parsers.
+- **Machine Learning Bottlenecks**: Scikit-learn requires flat contiguous arrays. Dask DataFrames cannot be passed directly into standard `GradientBoostingClassifier` without pulling them entirely into memory (`.compute()`), which defeats the purpose. This necessitates upgrading the ML library altogether (see point 2).
+
+## 2. Machine Learning: XGBoost or LightGBM vs Scikit-Learn
+The current `bdt_analysis.py` workflow utilizes Scikit-learn's `GradientBoostingClassifier`. 
+- **Performance**: Scikit-learn's implementation is notoriously slow for large datasets compared to modern gradient boosting frameworks.
+- **Weight Handling**: Frameworks like `XGBoost` and `LightGBM` have more advanced, native capabilities for handling event weights (including negative weights generated from NLO interference), potentially sidestepping some of the manual absolute-weight hacking required during training.
+- **Distributed Training Integration**: If implementing Dask (as per point 1), `xgboost.dask` or LightGBM's parallel APIs are required to natively ingest chunked Dask DataFrames without crashing the system's memory.

@@ -148,7 +148,7 @@ def apply_analysis_cuts(data, control_type):
     data = data.reset_index(drop=True)  # Ensure index is sequential and starting from 0
     mask = pd.Series([True] * len(data))
     for var, expr in cuts.items():
-        mask &= eval(expr, {}, {'x': data[var]})
+        mask &= pd.eval(expr, local_dict={'x': data[var]})
     mask = mask.reset_index(drop=True)  # Align mask index with data
     return data[mask]
 

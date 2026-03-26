@@ -1,11 +1,15 @@
 #!/usr/bin/python
 
-import helpers
-import calculators
-import custom_plots
+try:
+    from . import helpers
+    from . import calculators
+    from . import custom_plots
+except ImportError:
+    import helpers
+    import calculators
+    import custom_plots
 
-if __name__ == "__main__":
-
+def main():
     # Parse command line arguments or run initialization flags
     region, control_type, event_type, scaling_option = helpers.load_run_config('./src/config/config.yaml')
     scaling_factors = helpers.get_scaling_factors(scaling_option)
@@ -55,8 +59,6 @@ if __name__ == "__main__":
     print(f"Region: {region}, Control Type: {control_type}, Event Type: {event_type}")
     for channel in channels:
         print(f"Significance for {channel}: {yield_results[channel]['significance']:.2f}")
-    
-    
-    
-        
-    
+
+if __name__ == "__main__":
+    main()

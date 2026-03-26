@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import roc_curve, auc, classification_report
-import helpers
+try:
+    from . import helpers
+except ImportError:
+    import helpers
 import os
 import datetime
 
@@ -112,15 +115,15 @@ def run_bdt_analysis():
     # For now, I will use abs(weights) for TRAINING to ensure stability.
     train_weights = np.abs(weights)
 
-    # Split
-    X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(
-        X, y, train_weights, test_size=0.25, random_state=42, stratify=y
+    # Split X, y, and BOTH the original weights and absolute training weights
+    X_train, X_test, y_train, y_test, w_train_abs, w_test_abs, w_train_raw, w_test_raw = train_test_split(
+        X, y, train_weights, weights, test_size=0.25, random_state=42, stratify=y
     )
     
     # 2. Training
     print("Training GradientBoostingClassifier...")
     clf = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
-    clf.fit(X_train, y_train, sample_weight=w_train)
+    clf.fit(X_train, y_train, sample_weight=w_train_abs)
     
     # 3. Evaluation
     print("Evaluating...")
@@ -129,8 +132,8 @@ def run_bdt_analysis():
     y_score_test = clf.decision_function(X_test)
     y_score_train = clf.decision_function(X_train)
     
-    # ROC Curve
-    fpr, tpr, _ = roc_curve(y_test, y_score_test, sample_weight=w_test)
+    # ROC Curve (Must use absolute weights for ROC geometry mathematically, since negative events invert True/False Positive Rates)
+    fpr, tpr, _ = roc_curve(y_test, y_score_test, sample_weight=w_test_abs)
     roc_auc = auc(fpr, tpr)
     print(f"Test AUC: {roc_auc:.4f}")
     
@@ -158,15 +161,15 @@ def run_bdt_analysis():
     
     # Signal Train/Test
     plt.hist(y_score_train[y_train==1], bins=40, range=(-5, 5), density=True, 
-             weights=w_train[y_train==1], alpha=0.5, color='blue', label='Signal (Train)')
+             weights=w_train_raw[y_train==1], alpha=0.5, color='blue', label='Signal (Train)')
     plt.hist(y_score_test[y_test==1], bins=40, range=(-5, 5), density=True, 
-             weights=w_test[y_test==1], histtype='step', linewidth=2, color='blue', linestyle='--', label='Signal (Test)')
+             weights=w_test_raw[y_test==1], histtype='step', linewidth=2, color='blue', linestyle='--', label='Signal (Test)')
              
     # Background Train/Test
     plt.hist(y_score_train[y_train==0], bins=40, range=(-5, 5), density=True, 
-             weights=w_train[y_train==0], alpha=0.5, color='red', label='Background (Train)')
+             weights=w_train_raw[y_train==0], alpha=0.5, color='red', label='Background (Train)')
     plt.hist(y_score_test[y_test==0], bins=40, range=(-5, 5), density=True, 
-             weights=w_test[y_test==0], histtype='step', linewidth=2, color='red', linestyle='--', label='Background (Test)')
+             weights=w_test_raw[y_test==0], histtype='step', linewidth=2, color='red', linestyle='--', label='Background (Test)')
              
     plt.xlabel('BDT Score')
     plt.ylabel('Normalized Density')
@@ -198,11 +201,11 @@ def run_bdt_analysis():
     
     # Background Train/Test (Yields)
     plt.hist(y_score_test[y_test==0], bins=bins, density=False, 
-             weights=w_test[y_test==0], histtype='stepfilled', alpha=0.3, color='red', label='Background (Test)')
+             weights=w_test_raw[y_test==0], histtype='stepfilled', alpha=0.3, color='red', label='Background (Test)')
              
     # Signal Train/Test (Yields)
     plt.hist(y_score_test[y_test==1], bins=bins, density=False, 
-             weights=w_test[y_test==1], histtype='step', linewidth=2, color='blue', label='Signal (Test)')
+             weights=w_test_raw[y_test==1], histtype='step', linewidth=2, color='blue', label='Signal (Test)')
              
     plt.xlabel('BDT Score')
     plt.ylabel('Events (Weighted Yields)')
@@ -222,7 +225,7 @@ def run_bdt_analysis():
     test_fraction = 0.25
     scale_factor = 1.0 / test_fraction
     
-    optimize_bdt_cut(clf, X_test, y_test, w_test, output_dir, scale_factor)
+    optimize_bdt_cut(clf, X_test, y_test, w_test_raw, output_dir, scale_factor)
     pass
 
     print(f"Analysis complete. Results saved to {output_dir}")
@@ -253,14 +256,8 @@ def optimize_bdt_cut(clf, X, y, weights, output_dir, scale_factor=1.0):
         mask = scores > cut
         
         # Calculate Signal and Background yields passing the cut
-        # Use signed weights (weights can be negative in NLO but we usually take abs for training)
-        # Wait, 'weights' passed here is w_test which we defined as abs(weights) in main function!
-        # Correct logic: We should use REAL weights for significance.
-        # But 'w_test' passed to this function came from 'w_test' in main, which is 'train_weights' split.
-        # And 'train_weights' was defined as np.abs(weights).
-        # To be purely correct, we should pass original signed weights. 
-        # But let's assume abs() is close enough for shape estimation or that user wants standard approximation.
-        # Given we trained on abs(), using abs() for significance is consistent with "what the BDT sees".
+        # We must use TRUE signed weights for significance to account for destructive interference
+        # in NLO MC backgrounds, even if the BDT was trained on abs() weights.
         
         # Project Yields to Full Dataset Size
         S_test = np.sum(weights[(y==1) & mask])
