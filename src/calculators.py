@@ -5,6 +5,7 @@ import numpy as np
 import math
 from matplotlib import pyplot as plt
 from matplotlib.offsetbox import AnchoredText
+from datetime import datetime
 
 def calculate_significance(signal, background):
     """
@@ -239,7 +240,8 @@ def create_yield_table(results, channels):
 
 def save_results(results, figures, channels, region, control_type, event_type, scaling_option, variable_binning):
     """Save all results to files"""
-    output_dir = f"results/{region}_{control_type}_{event_type}_{scaling_option}"
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    output_dir = f"results/{region}_{control_type}_{event_type}_{scaling_option}_{timestamp}"
     os.makedirs(output_dir, exist_ok=True)
     
     # Save yield tables
@@ -247,10 +249,19 @@ def save_results(results, figures, channels, region, control_type, event_type, s
     yield_table.to_csv(f"{output_dir}/yields.csv")
     
     # Save plots
-    for i, fig in enumerate(figures):
-        var_name = list(variable_binning.keys())[i]
-        fig.savefig(f"{output_dir}/{var_name}.png")
-        plt.close(fig)
+    if isinstance(figures, dict):
+        for name, fig in figures.items():
+            folder_name = name.split('_')[-1]
+            type_dir = os.path.join(output_dir, folder_name)
+            if not os.path.exists(type_dir):
+                os.mkdir(type_dir)
+            fig.savefig(f"{type_dir}/{name}.png", bbox_inches='tight')
+            plt.close(fig)
+    else:
+        for i, fig in enumerate(figures):
+            var_name = list(variable_binning.keys())[i]
+            fig.savefig(f"{output_dir}/{var_name}.png", bbox_inches='tight')
+            plt.close(fig)
     
     # Save additional information
     with open(f"{output_dir}/summary.txt", "w") as f:

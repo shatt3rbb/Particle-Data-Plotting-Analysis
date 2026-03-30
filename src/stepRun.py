@@ -43,14 +43,13 @@ def main():
         plot_data.append(background[key])
         plot_names.append(f"{key} Background") 
 
-    figures = []
+    figures = {}
     for var, bins in variable_binning.items():
-        #fig = calculators.plot_distributions(plot_data, plot_names, var, bins, region)
-        #fig = custom_plots.plot_signal_over_background(plot_data, plot_names, var, bins, region)
-        #fig = custom_plots.plot_separation_density(plot_data, plot_names, var, bins, region)
-        fig = custom_plots.plot_aggregated_signal_background_comparison(plot_data, plot_names, var, bins, region)
-        figures.append(fig)
-
+        figures[f"{var}_plotDistributions"] = calculators.plot_distributions(plot_data, plot_names, var, bins, region)
+        figures[f"{var}_SignalOverBackground"] = custom_plots.plot_signal_over_background(plot_data, plot_names, var, bins, region)
+        figures[f"{var}_SeparationDensity"] = custom_plots.plot_separation_density(plot_data, plot_names, var, bins, region)
+        figures[f"{var}_AggregatedSignalBackgroundComparison"] = custom_plots.plot_aggregated_signal_background_comparison(plot_data, plot_names, var, bins, region)
+    
     # Save results
     calculators.save_results(yield_results, figures, channels, region, control_type, event_type, scaling_option, variable_binning)
 

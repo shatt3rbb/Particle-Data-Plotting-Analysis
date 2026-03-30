@@ -18,7 +18,7 @@
 BASE_PATH: ./SAMPLES/
 analysis:
   region: SR
-  control_type: SR
+  control_type: NoCuts
   event_type: all
   scaling_option: Unscaled
 
