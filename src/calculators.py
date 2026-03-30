@@ -4,6 +4,8 @@ import uproot
 import numpy as np
 import math
 from matplotlib import pyplot as plt
+# Suppress the warning about too many open figures
+plt.rcParams['figure.max_open_warning'] = 0
 from matplotlib.offsetbox import AnchoredText
 from datetime import datetime
 
@@ -148,8 +150,8 @@ def plot_distributions(data_list, names, variable, bins, region):
         # Calculate ratio
         ratio = np.divide(data_hist, mc_hist)
         # Calculate relative errors
-        rel_data_err = np.divide(data_err, data_hist, where=(data_hist > 0))
-        rel_mc_err = np.divide(mc_err, mc_hist, where=(mc_hist > 0))
+        rel_data_err = np.divide(data_err, data_hist, out=np.zeros_like(data_err), where=(data_hist > 0))
+        rel_mc_err = np.divide(mc_err, mc_hist, out=np.zeros_like(mc_err), where=(mc_hist > 0))
         # Calculate ratio error
         ratio_err = np.multiply(ratio, np.sqrt(rel_data_err**2 + rel_mc_err**2))
         # Replace problematic values

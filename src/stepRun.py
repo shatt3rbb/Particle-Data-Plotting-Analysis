@@ -8,6 +8,7 @@ except ImportError:
     import helpers
     import calculators
     import custom_plots
+    import pandas as pd
 
 def main():
     # Parse command line arguments or run initialization flags
@@ -19,10 +20,18 @@ def main():
 
     #Load data filtering by event type, calculate derived variables per event and apply analysis cuts depending on control type
     SAMPLE_PATHS = helpers.get_SAMPLE_PATHS(base_path)
-    for sample_name, file_name in SAMPLE_PATHS.items():
-        samples[sample_name] = helpers.load_data_filtering_event_type(base_path + file_name, event_type)
-        samples[sample_name] = helpers.calculate_derived_variables(samples[sample_name])
-        samples[sample_name] = helpers.apply_analysis_cuts(samples[sample_name], control_type)
+    for sample_name, files_list in SAMPLE_PATHS.items():
+        chunks = []
+        for file_name in files_list:
+            df = helpers.load_data_filtering_event_type(base_path + file_name, event_type)
+            df = helpers.calculate_derived_variables(df)
+            df = helpers.apply_analysis_cuts(df, control_type)
+            chunks.append(df)
+            
+        if chunks:
+            samples[sample_name] = pd.concat(chunks, ignore_index=True)
+        else:
+            samples[sample_name] = pd.DataFrame()
 
     samples = helpers.apply_scaling_factors(samples, scaling_factors)
     signal, background = helpers.create_signal_and_background(samples)

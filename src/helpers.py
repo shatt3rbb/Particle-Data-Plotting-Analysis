@@ -4,6 +4,7 @@ import os
 import uproot
 import numpy as np
 import awkward as ak
+import re
 
 def load_run_config(config_path):
     with open(config_path, 'r') as f:
@@ -63,8 +64,16 @@ def get_SAMPLE_PATHS(base_path):
         #AND NOT ignores all the root files starting with FT!!!(or ft)
         if os.path.isfile(os.path.join(base_path, fname)) and fname.lower().endswith('.root') and not fname.upper().startswith('FT') and not fname.startswith('llvvjj_WW')
     )
-    # Map sample key (filename without extension) -> filename (relative to base_path)
-    sample_map = {os.path.splitext(fname)[0]: fname for fname in files}
+    # Map sample logical key -> list of filenames (relative to base_path)
+    sample_map = {}
+    for fname in files:
+        base_name = os.path.splitext(fname)[0]
+        # Strip trailing _1 up to _99 logic
+        logical_name = re.sub(r'_\d{1,2}$', '', base_name)
+        if logical_name not in sample_map:
+            sample_map[logical_name] = []
+        sample_map[logical_name].append(fname)
+        
     return sample_map
 
 def load_data_filtering_event_type(sample_path, event_type):
@@ -128,11 +137,14 @@ def calculate_derived_variables(data):
     data.loc[(data["lepminus_phi"] < 0), "lepminus_phi"] += np.pi
     
     # Calculate derived variables
-    data['dPhill'] = data['lepplus_phi'] - data['lepminus_phi']
-    data['MetOZPt'] = data['met_tst'] / data['Z_pT']
-    data['MetOHT_2'] = data['met_tst'] / (data['Z_pT'] + data['leading_jet_pt'] + data['second_jet_pt'])
-    data['proshmo'] = (data['leading_jet_eta'] * data['second_jet_eta']) / np.abs((data['leading_jet_eta'] * data['second_jet_eta']))
-    data['mT_ZZ'] = np.sqrt(2 * np.abs(data['Z_pT']) * np.abs(data['met_tst']) * (1 - np.cos(data['dMetZPhi'])))
+    new_cols = pd.DataFrame({
+        'dPhill': data['lepplus_phi'] - data['lepminus_phi'],
+        'MetOZPt': data['met_tst'] / data['Z_pT'],
+        'MetOHT_2': data['met_tst'] / (data['Z_pT'] + data['leading_jet_pt'] + data['second_jet_pt']),
+        'proshmo': (data['leading_jet_eta'] * data['second_jet_eta']) / np.abs((data['leading_jet_eta'] * data['second_jet_eta'])),
+        'mT_ZZ': np.sqrt(2 * np.abs(data['Z_pT']) * np.abs(data['met_tst']) * (1 - np.cos(data['dMetZPhi'])))
+    })
+    data = pd.concat([data, new_cols], axis=1).copy()
     
     return data
 
