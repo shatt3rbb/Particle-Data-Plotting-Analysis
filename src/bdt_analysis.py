@@ -109,7 +109,7 @@ def run_bdt_analysis():
     weights = full_df['global_weight'].values
 
     # Handle negative weights caution: GBDT fits indices to minimize loss. 
-    # If weights are negative, it maximizes loss? 
+    # If weights are negative, it maximizes loss?                        
     # Standard practice: Take abs() for training presence, or ignore negative weights if small fraction.
     # Let's check yield.
     # For now, I will use abs(weights) for TRAINING to ensure stability.

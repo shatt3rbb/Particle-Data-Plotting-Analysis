@@ -15,7 +15,7 @@
 #         CR1_NB,CR1_WB,CR2_NB,CR2_WB,CR3_NB,CR3_WB
 #         3lCR_var1,3lCR_var2,3lCR_var3,3lCR_var4
 #         emCR_var1,emCR_var2,emCR_var3,emCR_var4
-BASE_PATH: /home/stzanetis/Documents/Thesis/Full_Data_Samples/samples_ZZ_new/SAMPLES/
+BASE_PATH: G:\FullThesisFolders\MainAnalysis\analysis-project\SAMPLES\
 analysis:
   region: SR
   control_type: NoCuts

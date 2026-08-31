@@ -57,7 +57,9 @@ def region_and_event_type_check(region, event_type, base_path):
 
 # ...existing code...
 def get_SAMPLE_PATHS(base_path):
-
+    # Check if base_path exists
+    if not os.path.exists(base_path):
+        raise FileNotFoundError(f"Base path does not exist: {base_path}")
     # List all .root files (non-recursive) and build a mapping:
     files = sorted(
         fname for fname in os.listdir(base_path)

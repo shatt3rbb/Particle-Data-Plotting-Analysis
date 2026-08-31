@@ -17,7 +17,13 @@ def main():
     samples = {}
     base_path = helpers.get_SAMPLES_base_path()
     base_path = helpers.region_and_event_type_check(region, event_type, base_path)
-
+    print(f"Loading script with the following options:")
+    print(f"Region: {region}")
+    print(f"Control Type: {control_type}")
+    print(f"Event Type: {event_type}")
+    print(f"Scaling Option: {scaling_option}")
+    print(f"Base Path: {base_path}")
+    
     #Load data filtering by event type, calculate derived variables per event and apply analysis cuts depending on control type
     SAMPLE_PATHS = helpers.get_SAMPLE_PATHS(base_path)
     for sample_name, files_list in SAMPLE_PATHS.items():
